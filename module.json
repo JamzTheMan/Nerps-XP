@@ -1,33 +1,34 @@
 {
-  "name": "module",
-  "title": "New Module",
-  "description": "",
-  "version": "This is auto replaced",
+  "name": "nerps-xp",
+  "title": "Nerps XP",
+  "description": "A GM aid that will show the threat level of an encounter in the combat tracker and update live as you add or remove characters.",
+  "version": "v1.0.0",
   "library": "false",
   "manifestPlusVersion": "1.0.0",
   "minimumCoreVersion": "0.8.8",
   "compatibleCoreVersion": "0.8.8",
   "authors": [
     {
-      "name": "The League of Extraordinary FVTT Developers",
-      "url": "https://github.com/League-of-Foundry-Developers",
-      "discord": "discordID#0001"
+      "name": "JamzTheMan",
+      "url": "https://github.com/JamzTheMan",
+      "discord": "Jamz#7942"
     }
   ],
   "dependencies": [
-
+    {
+      "name": "pf2e",
+      "type": "system"
+    }
   ],
   "conflicts": [
-    
   ],
   "esmodules": [
-    "/scripts/module.js"
+    "/scripts/nerps-xp.js"
   ],
   "scripts": [
-    "/scripts/lib/lib.js"
   ],
   "styles": [
-    "/styles/module.css"
+    "/styles/nerps-xp.css"
   ],
   "languages": [
     {
@@ -42,7 +43,7 @@
   "media": [
     {
       "type": "icon",
-      "url": "https://avatars2.githubusercontent.com/u/71292812?s=400&u=ccdb4eeb7abf551ca8f314e5a9bfd0479a4d3d41&v=4"
+      "url": "https://avatars.githubusercontent.com/u/8051654?v=4"
     }
   ]
 }

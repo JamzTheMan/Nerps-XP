@@ -1,3 +1,6 @@
 {
-    "MODULE.hello": "hello"
+    "Nerps-XP.show-encounter-xp.name": "Show Encounter Threat Level",
+    "Nerps-XP.show-encounter-xp.hint": "When creating a combat encounter, display the threat level and XP budget for that encounter.",
+    "Nerps-XP.show-encounter-xp-hud.name": "Show XP on Token HUD.",
+    "Nerps-XP.show-encounter-xp-hud.hint": "When creating a combat encounter, the XP a creature will add to the budget will be displayed on the token's HUD.."
 }
