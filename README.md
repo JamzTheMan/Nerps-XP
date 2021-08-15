@@ -19,6 +19,9 @@ An Add-On Module for Foundry VTT to auto-calculate Pathfinder 2E encounter XP ba
 ##Shout Out!
 This module was clearly inspired by [Monk's Little Details](https://github.com/ironmonk88/monks-little-details) module and some code/css shamelessly borrowed as a basis for this module!
 
+## Install
+To manually install, add this URL: https://github.com/JamzTheMan/Nerps-XP/releases/latest/download/module.json
+
 ## Future Plans
 Not a lot of features are planned for this module. It only needs to do one thing and that is assist the GM with building/scaling an encounter.
 
