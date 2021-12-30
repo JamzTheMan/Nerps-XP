@@ -2,7 +2,7 @@ import { NerpsXP, i18n } from "./nerps-xp.js";
 
 export const registerSettings = function () {
     // Register any custom module settings here
-	let modulename = "nerps-xp";
+	let modulename = "Nerps-XP";
 
 	const debouncedReload = foundry.utils.debounce(function () { window.location.reload(); }, 100);
 

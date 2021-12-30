@@ -8,38 +8,47 @@ export let i18n = key => {
 };
 
 export let setting = key => {
-  return game.settings.get("nerps-xp", key);
+  return game.settings.get("Nerps-XP", key);
 };
 
 export const threatLevels = ["trivial", "low", "moderate", "severe", "extreme"];
 
 export class NerpsXP {
+  static getLevels(actors, type) {
+    return actors.filter((a) => a.data.type === type).map((a) => parseInt(a.data.data.details.level.value ?? "1", 10));
+  }
+
+  static getHazardLevels(actors) {
+    return actors.filter((a) => a.data.type === "hazard");
+  }
+
+  static getPartySize(combat) {
+    return combat.combatants
+    .filter(combatant => combatant.token.data.disposition === 1 && (combatant.actor.type === 'character' || combatant.actor.type === 'npc'))
+        .length;
+  }
+
+  static getPartyAPL(combat) {
+    return Math.round(
+        combat.combatants
+        .filter(combatant => combatant.token.data.disposition === 1 && (combatant.actor.type === 'character' || combatant.actor.type === 'npc'))
+        .reduce((accumulator, combatant, _, array) => accumulator + combatant.actor.data.data.details?.level?.value / array.length, 0));
+  }
+
   /*
    * Note: Neutral disposition are ignored...
   */
   static getBudgetXP(combat) {
     // Lets only use NPC & PC Sheets. Familiars and Vehicles shouldn't count for now.
     // NPC may be a valid Ally and can be excluded by setting to Neutral if needed.
-    const avgPartyLevel = Math.round(combat.combatants
-        .filter(combatant => combatant.token.data.disposition == 1 && (combatant.actor.type == 'character' || combatant.actor.type == 'npc'))
-        .reduce((accumulator, combatant, _, array) => accumulator + combatant.actor.data.data.details?.level?.value / array.length, 0)
-    );
-
-    const partySize = combat.combatants
-    .filter(combatant => combatant.token.data.disposition == 1 && (combatant.actor.type == 'character' || combatant.actor.type == 'npc'))
-        .length;
+    const avgPartyLevel = NerpsXP.getPartyAPL(combat);
+    const partySize = NerpsXP.getPartySize(combat);
 
     const npcLevels = combat.combatants
-    .filter(combatant => combatant.token.data.disposition == -1 && (combatant.actor.type == 'character' || combatant.actor.type == 'npc'))
+    .filter(combatant => combatant.token.data.disposition === -1 && (combatant.actor.type === 'character' || combatant.actor.type === 'npc'))
     .map(combatant => combatant.actor.data.data.details?.level?.value);
 
-    let hazardLevels = [];
-    const hazards = combat.combatants
-    .filter(combatant => combatant.token.data.disposition == -1 && (combatant.actor.type == 'hazard'))
-    .forEach(hazard => hazardLevels.push({
-      level: {value: hazard.actor.data.data.details?.level?.value},
-      isComplex: hazard.actor.data.data.details?.isComplex
-    }));
+    const hazardLevels = combat.combatants.filter(combatant => combatant.token.data.disposition === -1 && (combatant.actor.type === 'hazard')).map(combatant => combatant.actor)
 
     log.debug("partySize: ", partySize);
     log.debug("npcLevels: ", npcLevels);
@@ -54,13 +63,21 @@ export class NerpsXP {
     const budgetLeft = xpData.totalXP - xpData.encounterBudgets[xpData.rating]
     const nextThreatBudget = xpData.encounterBudgets[nextLevel] - xpData.totalXP;
 
+    log.debug("nextThreatBudget: ", nextThreatBudget);
+
     let threatLevel = xpData.totalXP > 0 ? xpData.rating : "No Threat";
     let budgetNext = nextThreatBudget > 0 ? `Next: ${nextThreatBudget}xp` : "&mdash;";
 
+    log.debug("threatLevel: ", threatLevel);
+    log.debug("budgetNext: ", budgetNext);
+    log.debug("budgetLeft: ", budgetLeft);
+
     // Don't show next budget until there is a threat
-    if (budgetLeft <= 0 || threatLevel === "No Threat") {
+    if (threatLevel === "No Threat") {
       budgetNext = "&mdash;";
     }
+
+    log.debug("budgetNext 2: ", budgetNext);
 
     // Set next budget to a x multiplier of trivial budget over extreme budget
     if (threatLevel === "extreme") {
@@ -76,7 +93,9 @@ export class NerpsXP {
       budgetLeft: budgetLeft,
       budgetNext: budgetNext,
       apl: avgPartyLevel,
-      threat: threatLevel
+      threat: threatLevel,
+      reward: xpData.ratingXP,
+      rewardPerPlayer: xpData.xpPerPlayer
     };
   }
 }
@@ -107,13 +126,13 @@ export class Logger {
  *********/
 Hooks.once('init', async function () {
   console.log(`%c
-    _   __                          _  __ ____ 
-   / | / /__  _________  _____     | |/ // __ \\
-  /  |/ / _ \\/ ___/ __ \\/ ___/_____|   // /_/ /
- / /|  /  __/ /  / /_/ (__  )_____/   |/ ____/ 
-/_/ |_/\\___/_/  / .___/____/     /_/|_/_/      
-               /_/                             
-`, `font-family: monospace`);
+  _  _                  __  _____ 
+ | \\| |___ _ _ _ __ ___ \\ \\/ / _ \\
+ | .\` / -_) '_| '_ (_-<  >  <|  _/
+ |_|\\_\\___|_| | .__/__/ /_/\\_\\_|  
+              |_|                                                  
+v${game.modules.get("Nerps-XP").data.version}
+`, `font-family: monospace`); // Small
 
   registerSettings();
   log = new Logger();
@@ -137,21 +156,54 @@ Hooks.on('renderCombatTracker', async (app, html, data) => {
   let xpToNextBudget = signedBudgetLeft != 0 ? ` (${signedBudgetLeft})` : "";
 
   if (data.combat.combatants.size > 0) {
-    $('<nav>').addClass('encounters flexrow encounter-xp-row')
+    $('<nav>').addClass('encounters flexrow encounter-xp-row').attr('id', 'encounter-xp-row-1')
     .append($('<h3>').html('APL: ' + xpData.apl))
     .append($('<div>').addClass('encounter-xp').attr('rating', xpData.threat).html(xpData.threat + "!".repeat(xpData.overkill) + xpToNextBudget))
     .append($('<h3>').html(xpData.budgetNext))
     .insertAfter($('#combat-round .encounters:last'));
-  }
 
+    if (xpData.reward === xpData.rewardPerPlayer) {
+      $('<nav>').addClass('encounters flexrow encounter-xp-row-2')
+      .append($('<h3>').html(`Reward: ${xpData.reward} xp`))
+      .insertAfter($('#encounter-xp-row-1'));
+    } else {
+      $('<nav>').addClass('encounters flexrow encounter-xp-row-2')
+      .append($('<h3>').html(`Reward: ${xpData.reward} xp`))
+      .append($('<h3>').html(`Adjusted: ${xpData.rewardPerPlayer} xp`))
+      .insertAfter($('#encounter-xp-row-1'));
+    }
+  }
 });
 
-// Hooks.on('renderTokenHUD', async (app, html, options) => {
-//   if (!setting('show-encounter-xp-hud') || !game.user.isGM || !game.combat) {
-//     return;
-//   }
-//
-//   // $('.col.right', html).append(
-//   //       $('<h3>').html("+100xp")
-//   // );
-// });
+Hooks.on('renderTokenHUD', async (app, html, options) => {
+  if (!setting('show-encounter-xp-hud') || !game.user.isGM || !game.combat) {
+    return;
+  }
+
+  const hudActor = app.object.data.document.actor
+  const characterType = hudActor.type
+
+  if (characterType !== "npc" && characterType !== "hazard") {
+    return;
+  }
+
+  let npcLevels = NerpsXP.getLevels([hudActor], "npc");
+  let avgPartyLevel = NerpsXP.getPartyAPL(game.combat);
+  let partySize = NerpsXP.getPartySize(game.combat);
+  let hazardLevels = NerpsXP.getHazardLevels([hudActor]);
+
+  const xp = game.pf2e.gm.calculateXP(avgPartyLevel, partySize, npcLevels, hazardLevels, {
+    proficiencyWithoutLevel: game.settings.get("pf2e", "proficiencyVariant") === "ProficiencyWithoutLevel",
+  });
+
+  log.debug("TokenHUD: xp", xp);
+
+  let adjustFontSize = 'style="font-size:175%"'
+  if (hudActor.size == "tiny") {
+    adjustFontSize = 'style="font-size:90%"';
+  }
+
+  $('.col.middle', html).prepend(
+      $('<div class="attribute">').html(`<input ${adjustFontSize} type="text" readonly name="xp.value" data-bar="xp" value="+${xp.totalXP} xp">`)
+  );
+});
