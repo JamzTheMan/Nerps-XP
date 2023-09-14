@@ -1,35 +1,41 @@
 {
-  "name": "Nerps-XP",
-  "title": "Nerps XP",
+  "id": "pf2e-xp",
+  "title": "PF2e Xp - Infused with Nerps!",
   "description": "A GM aid that will show the threat level of an encounter in the combat tracker and update live as you add or remove characters.",
-  "version": "3.0.0",
+  "version": "1.0.0",
   "library": "false",
-  "manifestPlusVersion": "3.0.0",
-  "minimumCoreVersion": 9,
-  "compatibleCoreVersion": 9,
+  "manifestPlusVersion": "1.0.0",
+  "compatibility": {
+    "minimum": 11,
+    "verified": 11.308
+  },
   "authors": [
     {
       "name": "JamzTheMan",
-      "url": "https://github.com/JamzTheMan",
-      "discord": "Jamz#7942"
+      "url": "https://github.com/JamzTheMan/Nerps-XP",
+      "discord": "jamztheman"
     }
   ],
-  "system": ["pf2e"],
-  "dependencies": [
-    {
-      "name": "pf2e",
-      "type": "system"
-    }
-  ],
+  "relationships": {
+    "systems": [
+      {
+        "id": "pf2e",
+        "type": "system",
+        "compatibility": {
+          "verified": "5.4.4"
+        }
+      }
+    ]
+  },
   "conflicts": [
   ],
   "esmodules": [
-    "/scripts/nerps-xp.js"
+    "/scripts/pf2e-xp.js"
   ],
   "scripts": [
   ],
   "styles": [
-    "/styles/nerps-xp.css"
+    "/styles/pf2e-xp.css"
   ],
   "languages": [
     {

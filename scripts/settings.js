@@ -1,31 +1,29 @@
-import { NerpsXP, i18n } from "./nerps-xp.js";
+import { i18n } from "./pf2e-xp.js";
 
 export const registerSettings = function () {
     // Register any custom module settings here
-	let modulename = "Nerps-XP";
+	const MODULE_NAME = "pf2e-xp";
 
-	const debouncedReload = foundry.utils.debounce(function () { window.location.reload(); }, 100);
-
-	game.settings.register(modulename, "show-encounter-xp", {
-		name: i18n("Nerps-XP.show-encounter-xp.name"),
-		hint: i18n("Nerps-XP.show-encounter-xp.hint"),
+	game.settings.register(MODULE_NAME, "show-encounter-xp", {
+		name: i18n("pf2e-xp.show-encounter-xp.name"),
+		hint: i18n("pf2e-xp.show-encounter-xp.hint"),
 		scope: "world",
 		config: true,
 		default: true,
 		type: Boolean,
-		onChange: debouncedReload
+		requiresReload: true
 	});
 
-	game.settings.register(modulename, "show-encounter-xp-hud", {
-		name: i18n("Nerps-XP.show-encounter-xp-hud.name"),
-		hint: i18n("Nerps-XP.show-encounter-xp-hud.hint"),
+	game.settings.register(MODULE_NAME, "show-encounter-xp-hud", {
+		name: i18n("pf2e-xp.show-encounter-xp-hud.name"),
+		hint: i18n("pf2e-xp.show-encounter-xp-hud.hint"),
 		scope: "world",
 		config: true,
 		default: true,
 		type: Boolean
 	});
 
-	game.settings.register(modulename, "debug-mode", {
+	game.settings.register(MODULE_NAME, "debug-mode", {
 		name: "Toggle Debug Mode",
 		hint: "If checked, will enable Debug level logging for Nerps XP.",
 		scope: "world",
